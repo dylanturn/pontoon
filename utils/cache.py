@@ -1,10 +1,14 @@
 import os
 import json
 import redis
+import logging
+
+log = logging.getLogger(__name__)
 
 
 class RedisCache:
-  def __init__(self, redis_host, redis_port, redis_db, redis_user=None, redis_pass=None):
+  def __init__(self, plugin_name, redis_host, redis_port, redis_db, redis_user=None, redis_pass=None):
+    self.plugin_name = plugin_name
     self.default_cache_ttl = os.environ.get('PONTOON_DEFAULT_CACHE_TTL', 259200)
     if (redis_user is None) or (redis_pass is None):
       self.client = redis.Redis(host=redis_host, port=redis_port, db=redis_db)
@@ -30,13 +34,14 @@ class RedisCache:
     if item_ttl is None:
       item_ttl = self.default_cache_ttl
 
+    log.info(f"Set item with key: {self.plugin_name}:{item_key}")
     # place the entry into Redis with the appropriate TTL.
-    self.client.set(item_key, json.dumps(item_entry), ex=item_ttl)
-
+    self.client.set(f"{self.plugin_name}:{item_key}", json.dumps(item_entry), ex=item_ttl)
 
   def get_cache_item(self, item_key):
+    log.info(f"Get item with key: {self.plugin_name}:{item_key}")
     # Go to Redis to get the cache entry
-    cache_entry = self.client.get(item_key)
+    cache_entry = self.client.get(f"{self.plugin_name}:{item_key}")
 
     # If the cache entry is None we just return None.
     if cache_entry is None:
@@ -52,4 +57,5 @@ class RedisCache:
       return cache_entry["value"]
 
   def expire_cache_item(self, item_key):
-    self.client.delete(item_key)
+    log.info(f"Expire item with key: {self.plugin_name}:{item_key}")
+    self.client.delete(f"{self.plugin_name}:{item_key}")

@@ -1,26 +1,12 @@
 import os
-import sys
-import pkgutil
+import logging
 from flask import Flask
 from utils import health
-
-
-def load_plugins():
-  print("Start loading plugins...")
-  for importer, package_name, _ in pkgutil.iter_modules(["plugins"]):
-    full_package_name = '%s.%s' % ("plugins", package_name)
-    if full_package_name not in sys.modules:
-      module = importer.find_module(package_name).load_module(package_name)
-      print(f"Loading plugin: {module.__name__}")
-      app.register_blueprint(module.plugin, url_prefix=f"/api/v1/{module.__name__}")
-  print("Plugin loading complete!")
-  print(app.url_map)
-
+from utils import plugin
 
 app = Flask(__name__)
-load_plugins()
-app.register_blueprint(health.plugin, url_prefix=f"/api/v1/health")
-
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger(__name__)
 
 if __name__ == "__main__":
   pontoon_host = os.environ.get('PONTOON_HOST')
@@ -42,5 +28,14 @@ if __name__ == "__main__":
       pontoon_ssl_context = (pontoon_cert, pontoon_key)
   else:
     print("Starting without SSL")
+
+  plugin_loader = plugin.PluginLoader(app, "/api/v1")
+  plugin_health = health.PluginHealth(plugin_loader.loaded_plugins)
+
+  print("====================")
+  print("Routes Loaded:")
+  for rule in app.url_map._rules:
+    print(f"\t{rule}")
+  print("====================")
 
   app.run(host=pontoon_host, port=pontoon_port, ssl_context=pontoon_ssl_context)
