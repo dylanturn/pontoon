@@ -20,13 +20,11 @@
 
         <input type="submit" value="Submit">
     </form>
-    <br /><br />
-    <a href="/api/v1/whoami/logout">Logout</a>
-{% if session %}
+    <br />
+    {% if session %}
   <div>
-
       {{ session }}
   </div>
-{% endif %}
+    {% endif %}
   </body>
 </html>

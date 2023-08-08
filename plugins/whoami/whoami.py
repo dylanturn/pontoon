@@ -1,11 +1,9 @@
 import uuid
 from urllib.parse import urlencode, quote_plus
-from jinja2 import Environment, PackageLoader, select_autoescape
 from utils.plugin import Plugin
 from flask_classful import route
 from authlib.integrations.flask_client import OAuth
-from flask import Flask, request, redirect, render_template, session, url_for
-import json
+from flask import Flask, request, redirect, session, url_for
 import dill
 
 
@@ -17,15 +15,7 @@ class WhoAmI(Plugin):
 
     @route('/')
     def whoami(self):
-      return render_template("whoami.html", session=session.get('user'),
-                             pretty=json.dumps(session.get('user'), indent=4))
-#      env = Environment(
-#        loader=PackageLoader("yourapp"),
-#        autoescape=select_autoescape()
-#      )
-#      return template.render(the="variables", go="here")
-#      template = env.get_template("whoami.html")
-
+      return self.render_template("whoami.html", session=session.get('user'))
 
     @route('/lookup', methods=['POST'])
     def lookup(self):
@@ -37,8 +27,6 @@ class WhoAmI(Plugin):
       client_secret = payload["client_secret"]
       scope = payload["scope"]
       server_metadata_url = payload["server_metadata_url"]
-
-      #self.cache_client.cache_item(f"{request_id}:api_base_url", payload["server_metadata_url"])
 
       app = Flask("whoami")
       app.secret_key = request_id

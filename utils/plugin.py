@@ -7,7 +7,6 @@ import pkgutil
 from utils.cache import RedisCache
 from flask_classful import FlaskView
 from jinja2 import Environment, PackageLoader, select_autoescape
-
 log = logging.getLogger(__name__)
 
 
@@ -27,14 +26,17 @@ class Plugin(FlaskView):
   def __init__(self):
     self.on_startup()
     self.redis_client = RedisCache(self.__class__.__name__, os.environ['REDIS_HOST'], os.environ['REDIS_PORT'], os.environ['REDIS_DB'])
-#    self.env = Environment(
-#      loader=PackageLoader(self.name),
-#      autoescape=select_autoescape()
-#    )
+    self.env = Environment(
+      loader=PackageLoader(self.name.lower()),
+      autoescape=select_autoescape()
+    )
 
   @property
   def name(self):
     return self.__class__.__name__
+
+  def render_template(self, template_name, **kwargs):
+    return self.env.get_template(template_name).render(kwargs)
 
   @property
   def cache_client(self) -> RedisCache:
@@ -70,7 +72,11 @@ class PluginLoader:
 
     log.info("Start loading plugins...")
 
-    for importer, package_name, _ in pkgutil.iter_modules(["plugins"]):
+    plugin_dirs = []
+    for root, dirs, files in os.walk("plugins", topdown=False):
+      plugin_dirs.append(root)
+
+    for importer, package_name, _ in pkgutil.iter_modules(plugin_dirs):
       full_package_name = '%s.%s' % ("plugins", package_name)
       if full_package_name not in sys.modules:
         importer.find_module(package_name).load_module(package_name)
