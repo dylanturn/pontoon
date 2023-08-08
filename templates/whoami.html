@@ -1,0 +1,32 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Auth0 Example</title>
+  </head>
+  <body>
+    <form method="post" action="/api/v1/whoami/lookup">
+
+        <label for="client_id">Client ID:</label><br>
+        <input type="text" id="client_id" name="client_id" value="xx0NT2kfA1jE52rkkRf58TVjghPbK0f9"><br>
+
+        <label for="client_secret">Client Secret:</label><br>
+        <input type="password" id="client_secret" name="client_secret" value="RhObEaTzMHfyEmByTfvsYAAsukgbnQD3WcQH7cey_CxHQOwWsKB3KpOd6R7bwRb1"><br>
+
+        <label for="scope">Scope:</label><br>
+        <input type="text" id="scope" name="scope" value="openid"><br>
+
+        <label for="server_metadata_url">Server Metadata URL:</label><br>
+        <input type="text" id="server_metadata_url" name="server_metadata_url" value="https://homestead.us.auth0.com/.well-known/openid-configuration"><br>
+
+        <input type="submit" value="Submit">
+    </form>
+    <br /><br />
+    <a href="/api/v1/whoami/logout">Logout</a>
+{% if session %}
+  <div>
+
+      {{ session }}
+  </div>
+{% endif %}
+  </body>
+</html>

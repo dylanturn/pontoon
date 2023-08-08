@@ -1,12 +1,22 @@
 import os
 import logging
-from flask import Flask
+from flask import Flask, jsonify
 from utils import health
 from utils import plugin
+from utils.exceptions import AuthError
+
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
+
+
+@app.errorhandler(AuthError)
+def handle_auth_error(ex):
+    response = jsonify(ex.error)
+    response.status_code = ex.status_code
+    return response
+
 
 if __name__ == "__main__":
   pontoon_host = os.environ.get('PONTOON_HOST')

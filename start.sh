@@ -27,6 +27,10 @@ export PONTOON_AUTH=${PONTOON_AUTH:-false}
 # export PONTOON_CERT=
 # export PONTOON_KEY=
 
+export OIDC_DOMAIN=homestead.us.auth0.com
+export OIDC_API_AUDIENCE=https://terraturn.app
+export OIDC_ALGORITHM=RS256
+
 # If we set --build-only then we won't start the Flask app.
 for i in "$@" ; do
   if [[ $i == "--build-only" ]]

@@ -2,6 +2,8 @@ import os
 import json
 import redis
 import logging
+import base64
+import inspect
 
 log = logging.getLogger(__name__)
 
@@ -23,6 +25,7 @@ class RedisCache:
     # Create the item entry object that encapsulates the value.
     item_entry = dict()
     item_entry["format"] = item_format
+    log.info(f"Payload format: {item_format}")
 
     # If the value is a JSON object we need to dump it to a string first.
     if (item_format is dict.__name__) or (item_format is list.__name__):
@@ -39,7 +42,8 @@ class RedisCache:
     self.client.set(f"{self.plugin_name}:{item_key}", json.dumps(item_entry), ex=item_ttl)
 
   def get_cache_item(self, item_key):
-    log.info(f"Get item with key: {self.plugin_name}:{item_key}")
+    log.info(f" {inspect.stack()[1][3]}-Get item with key: {self.plugin_name}:{item_key}")
+
     # Go to Redis to get the cache entry
     cache_entry = self.client.get(f"{self.plugin_name}:{item_key}")
 

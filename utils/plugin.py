@@ -6,6 +6,7 @@ import logging
 import pkgutil
 from utils.cache import RedisCache
 from flask_classful import FlaskView
+from jinja2 import Environment, PackageLoader, select_autoescape
 
 log = logging.getLogger(__name__)
 
@@ -26,6 +27,10 @@ class Plugin(FlaskView):
   def __init__(self):
     self.on_startup()
     self.redis_client = RedisCache(self.__class__.__name__, os.environ['REDIS_HOST'], os.environ['REDIS_PORT'], os.environ['REDIS_DB'])
+#    self.env = Environment(
+#      loader=PackageLoader(self.name),
+#      autoescape=select_autoescape()
+#    )
 
   @property
   def name(self):
@@ -60,6 +65,8 @@ class PluginLoader:
     self.loaded_plugins = []
     self.app = app
     self.base_path = base_path
+
+    self.app.secret_key = "super secret key"
 
     log.info("Start loading plugins...")
 
